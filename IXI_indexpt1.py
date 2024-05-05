@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import time as time
 
 
+mgz_files = glob.glob("/path/to/segmentations/*")
+
 ##################################################################################################
 def biparietal_length(rr):      
     full_array = np.where(rr[:,:,:])

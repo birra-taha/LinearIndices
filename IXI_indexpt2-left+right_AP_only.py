@@ -7,15 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time as time
 
-mgz_files = glob.glob("/home/jusun/taha/IXI_fastsurfer_seg/*/*/*aparc*")
-
-
-######
-
-##.  Find the total brain mask volume (including cerebellum), supracortical volume (whole brain minus cerebellum and brainstem )
-
-
-
+mgz_files = glob.glob("/path/to/segmentations/*")
 
 
 
@@ -33,14 +25,12 @@ def bbox2(img):
 
 def thal_iterator(mgz_file):
     
-   # fullname = "/home/jusun/taha/peds_vents/vents_only/" + basename_nifti_file
     seg = ants.image_read(mgz_file)
     #print(img)
     seg_arr = seg.numpy()
     seg_arr_LV = np.where((seg_arr == 9.0) | (seg_arr == 10.0) | (seg_arr == 48.0) | (seg_arr == 49.0), 1.0, 0)     # turn off everything except the LV
     seg_LV = seg.new_image_like(seg_arr_LV)             # create the ants seg object for LV only
     seg_T = seg_arr_LV.T
-#rr = seg_T
     rr_thal = np.flip(seg_T, axis=0)
     
     full_array = np.where(rr_thal[:,:,:])
@@ -72,7 +62,6 @@ def thal_iterator(mgz_file):
        2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014,
        2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025,
        2026, 2027, 2028, 2029, 2030, 2031, 2034, 2035]
-#seg_arr_cortex = np.where(np.array(seg_arr).any() ==  np.array(tt).any(), 1.0, 0)
 
     seg_arr_cortex = np.where(np.isin(seg_arr, tt), 1.0, 0)
     cortex_vol = np.count_nonzero(seg_arr_cortex) * seg.spacing[0] *  seg.spacing[1]  *  seg.spacing[2]  
@@ -80,7 +69,6 @@ def thal_iterator(mgz_file):
     seg_T = seg_arr_LV.T
     seg_brain_mask = seg_arr_brain_mask.T
     
-#rr = seg_T
     rr_LV = np.flip(seg_T, axis=0)
     rr_brain_mask = np.flip(seg_brain_mask, axis=0)
     
@@ -96,12 +84,10 @@ def thal_iterator(mgz_file):
     a,b,c,d = bbox2(left_slice)
     left_AP = (b-a)*seg.spacing[0]        #distance from bottom to top on left side
     a,b,c,d = bbox2(right_slice)
-    right_AP = (b-a)*seg.spacing[0]        #distance from bottom to top on left side
+    right_AP = (b-a)*seg.spacing[0]        #distance from bottom to top on right side
     
     AP_mask = (b_bm - a_bm)*seg.spacing[0]
     
-  #  return left_AP, right_AP
- #   return left_AP, right_AP, AP_mask, slice_bm,slice
     return left_AP, right_AP, AP_mask, cortex_vol
 
 
@@ -117,8 +103,6 @@ df1 = pd.DataFrame()
 
 for scan in mgz_files: 
 
-
-    #nifti_file = mgz_file.replace(".mgz", "_vents-only.nii.gz")
     print(scan)
     scan_name_formatted = scan.split("/")[-3].replace("-T1", "")        #      IXI012-HH-1211
     
@@ -140,36 +124,6 @@ for scan in mgz_files:
 print(df1)
 df1.columns = ["Name", "Left AP", "Right AP", "Full AP (midline)", "Supratentorial volume"]
 
-df1.to_csv("/home/jusun/taha//vent_indices_projects/IXI_data_AP.tsv", sep="\t", index=False)
-    
-    
-    
-    
-    
-    #print("ymin: %s; ymax: %s; b_min: %s, b_max: %s" % (occipital_length(rr)[1],occipital_length(rr)[2], occipital_length(rr)[3], occipital_length(rr)[4]))
-    #print("ymin: %s; ymax: %s; b_min: %s, b_max: %s" % (frontal_length(rr)[1],frontal_length(rr)[2], frontal_length(rr)[3], frontal_length(rr)[4]))
- 
-    #plt.scatter(ymax,a_min)
-   # plt.scatter(ymin,a_min) 
-    #plt.scatter()
-   # fig, (ax1,ax2) = plt.subplots(1,2)
-    
-  #  ax1.hlines(occipital_length(rr)[2],occipital_length(rr)[3],occipital_length(rr)[4])
- #   ax1.imshow(occipital_length(rr)[6])
-#    ax2.hlines(frontal_length(rr)[3],frontal_length(rr)[1],frontal_length(rr)[2])
-
-    #ax2.imshow(frontal_length(rr)[6])
-    #plt.pause(0.05)
-    
-    #img_ventricles = img.new_image_like(img_arr)
-    #print(fullname)
-
-    
-    
-    
-    
-    
-    #img_ventricles.to_file(fullname)
-    
+df1.to_csv("/path/to/folder/file.tsv", sep="\t", index=False)
     
     

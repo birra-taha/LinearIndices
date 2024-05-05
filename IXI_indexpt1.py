@@ -5,11 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time as time
 
-mgz_files = glob.glob("/home/jusun/taha/IXI_fastsurfer_seg/*/*/*aparc*")
-
 
 ##################################################################################################
-def biparietal_length(rr):        #give me the array 
+def biparietal_length(rr):      
     full_array = np.where(rr[:,:,:])
     segmentation= full_array
     bbox = 0, 0, 0, 0, 0, 0
@@ -47,9 +45,6 @@ def biparietal_length(rr):        #give me the array
         er.append((i,int(z_max_i - z_min_i), z_min_i, z_max_i))
         
 
-#sort it, and find me the cut with the biggest width of the frontal horn
-#give me that specific iterator
-
     fl = [f(x) for x in er]
     fl.sort()
     fl.reverse()
@@ -71,11 +66,8 @@ def biparietal_length(rr):        #give me the array
     #axes.scatter(ymin,a_min) 
 
     return best_iterator,ymin,ymax,a_min,a_max,occipital_distance,slice
-#    return best_iterator,ymin,ymax,a_min,a_max,frontal_distance,slice
-
 
 ###############################################################
-######### functioning definign
 def bbox2(img):
     rows = np.any(img, axis=1)
     cols = np.any(img, axis=0)
@@ -118,14 +110,11 @@ def frontal_length(rr):        #give me the array
             box = bbox2(slice)   #DRAW A BOUNDING BOX AROUND THAT SLICE, 
         except:
             continue
-        z_min_i = box[2]         #SAVE THE BOUNDING BOX COORDINATESANCEF
+        z_min_i = box[2]         #SAVE THE BOUNDING BOX COORDINATES
         z_max_i = box[3]
     
         er.append((i,int(z_max_i - z_min_i), z_min_i, z_max_i))
         
-
-#sort it, and find me the cut with the biggest width of the frontal horn
-#give me that specific iterator
 
     fl = [f(x) for x in er]
     fl.sort()
@@ -178,17 +167,14 @@ def occipital_length(rr):        #give me the array
     for i in range(z_min,z_max):
         slice=rr[165:,i,:]        #first position is the Z, iterate through each z slice and chop off everything POSTERIOR TO FRONTAL HORNS LIKE THIS
         try:
-            box = bbox2(slice)   #DRAW A BOUNDING BOX AROUND THAT SLICE, 
+            box = bbox2(slice)   #DRAW A BOUNDING BOX AROUND THAT SLICE 
         except:
             continue
-        z_min_i = box[2]         #SAVE THE BOUNDING BOX COORDINATESANCEF
+        z_min_i = box[2]         #SAVE THE BOUNDING BOX COORDINATES
         z_max_i = box[3]
     
         er.append((i,int(z_max_i - z_min_i), z_min_i, z_max_i))
         
-
-#sort it, and find me the cut with the biggest width of the frontal horn
-#give me that specific iterator
 
     fl = [f(x) for x in er]
     fl.sort()
@@ -221,19 +207,18 @@ df1 = pd.DataFrame()
 for scan in mgz_files: 
 
 
-    #nifti_file = mgz_file.replace(".mgz", "_vents-only.nii.gz")
+
     print(scan)
     scan_name_formatted = scan.split("/")[-3].replace("-T1", "")        #      IXI012-HH-1211
 
 
-   # fullname = "/home/jusun/taha/peds_vents/vents_only/" + basename_nifti_file
     seg = ants.image_read(scan)
-    #print(img)
+
     seg_arr = seg.numpy()
     seg_arr_LV = np.where((seg_arr == 4.0) | (seg_arr == 5.0) | (seg_arr == 43.0) | (seg_arr == 44.0), 1.0, 0)     # turn off everything except the LV
     seg_LV = seg.new_image_like(seg_arr_LV)             # create the ants seg object for LV only
     seg_T = seg_arr_LV.T
-#rr = seg_T
+
     rr = np.flip(seg_T, axis=0)
     
     orig_img = ants.image_read(scan.replace("aparc.DKTatlas+aseg.deep.mgz", "mask.mgz"))
@@ -264,12 +249,6 @@ for scan in mgz_files:
         
     except:
         b_p = "NA"
-#        biparietal_length(orig_rr)
- #   except:
-  #      print("error")
-   #     continue
-    #a,b,c,d,e = frontal_length(rr)
-   # print("max frontal distance: %s, max occipital distance: %s, max biparietal length: %s, Approximate total volume: %s " % (frontal_distance * spacing[0], occipital_distance * spacing[0], biparietal_distance * spacing[0], np.count_nonzero(rr) * spacing_vol))
     
     df2 = pd.DataFrame([scan_name_formatted, f_d, o_d, b_p, np.count_nonzero(rr) * spacing_vol])
     
@@ -281,7 +260,7 @@ for scan in mgz_files:
 print(df1)
 df1.columns = ["Name", "Frontal Horn Width", "Occipital Horn Width", "Biparietal Width", "Lateral Ventricular Volume"]
 
-df1.to_csv("/home/jusun/taha/IXI_data_2.tsv", sep="\t", index=False)
+df1.to_csv("/path/to/folder/IXI_data.tsv", sep="\t", index=False)
     
     
     
